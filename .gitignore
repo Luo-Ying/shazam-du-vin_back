@@ -1,0 +1,8 @@
+venv
+./venv
+./venv/*
+/venv/
+/venv/bin/
+/venv/lib/
+/venv/pyvenv.cfg
+/.idea
