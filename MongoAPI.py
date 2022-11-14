@@ -17,6 +17,12 @@ class MongoAPI:
         output = [{item: data[item] for item in data if item != '_id'} for data in documents]
         return output
 
+    def readWith(self):
+        filt = self.data['Filter']
+        documents = self.collection.find(filt)
+        output = [{item: data[item] for item in data if item != '_id'} for data in documents]
+        return output
+
     def write(self, data):
         # log.info('Writing Data')
         new_document = data['Document']
