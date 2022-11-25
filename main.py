@@ -16,6 +16,23 @@ def getUsers():
     print(db.get_collection('User').find())
     return ":)"
 
+@app.route("/getUser", methods=['POST'])
+def getUser():
+    data = request.json
+    if data is None or data == {} or 'Filter' not in data:
+        obj1 = MongoAPI(data)
+        response = obj1.read()
+        return Response(response=json.dumps(response),
+                        status=200,
+                        mimetype='application/json')
+
+    if data and 'Filter' in data:
+        obj1 = MongoAPI(data)
+        response = obj1.readWith()
+        return Response(response=json.dumps(response),
+                        status=200,
+                        mimetype='application/json')
+
 
 @app.route('/User', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def user_crud():
@@ -57,7 +74,9 @@ def user_crud():
 
 
     if request.method == 'GET':
+        print("request: ", request)
         data = request.json
+        print("data: ", data)
         if data is None or data == {} or 'Filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
