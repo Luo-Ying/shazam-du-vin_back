@@ -18,28 +18,28 @@ class MongoAPI:
         return output
 
     def readWith(self):
-        filt = self.data['Filter']
+        filt = self.data['filter']
         documents = self.collection.find(filt)
         output = [{item: data[item] for item in data if item != '_id'} for data in documents]
         return output
 
     def write(self, data):
         # log.info('Writing Data')
-        new_document = data['Document']
+        new_document = data['data']
         response = self.collection.insert_one(new_document)
         output = {'Status': 'Successfully Inserted',
                   'Document_ID': str(response.inserted_id)}
         return output
 
     def update(self):
-        filt = self.data['Filter']
-        updated_data = {"$set": self.data['DataToBeUpdated']}
+        filt = self.data['filter']
+        updated_data = {"$set": self.data['data']}
         response = self.collection.update_one(filt, updated_data)
         output = {'Status': 'Successfully Updated' if response.modified_count > 0 else "Nothing was updated."}
         return output
 
     def delete(self, data):
-        filt = data['Document']
+        filt = data['filter']
         response = self.collection.delete_one(filt)
         output = {'Status': 'Successfully Deleted' if response.deleted_count > 0 else "Document not found."}
         return output
