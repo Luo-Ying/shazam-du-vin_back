@@ -243,3 +243,6 @@ def img_post():
                               ExtraArgs={'ContentType': "image/" + extension, 'ACL': 'public-read'})
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
+
+if __name__ == "__main__":
+   app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 5000)))
