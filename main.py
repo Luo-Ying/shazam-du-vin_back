@@ -104,19 +104,26 @@ def user_crud():
                         mimetype='application/json')
 
     if request.method == 'GET':
-        data = {
-            "database": "urbanisation",
-            "collection": "User",
-            "filter": {
-                "username": request.args.get('username'),
-                "password": request.args.get('password')
+        if request.args.get('username'):
+            data = {
+                "database": "urbanisation",
+                "collection": "User",
+                "filter": {
+                    "username": request.args.get('username'),
+                    "password": request.args.get('password')
+                }
             }
-        }
+        else:
+            data = {
+                "database": "urbanisation",
+                "collection": "User"
+            }
+            
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
-            response = obj1.readWith()
+            response = obj1.read()
             return Response(response=json.dumps(response),
-                            status=401,
+                            status=200,
                             mimetype='application/json')
 
         if data and 'filter' in data:
@@ -174,23 +181,50 @@ def vin_crud():
                         mimetype='application/json')
 
     if request.method == 'GET':
-        print("request: ", request)
-        data = request.json
-        print("data: ", data)
-        if data is None or data == {} or 'Filter' not in data:
+        data = {
+            "database": "urbanisation",
+            "collection": "Vin",
+            "filter": {
+                "username": request.args.get('username'),
+                "password": request.args.get('password')
+            }
+        }
+        if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
             return Response(response=json.dumps(response),
                             status=200,
                             mimetype='application/json')
 
-        if data and 'Filter' in data:
+        if data and 'filter' in data:
             obj1 = MongoAPI(data)
             response = obj1.readWith()
+
+            exist = json.dumps(response)
+            print(exist)
+            if exist.find("username") == "":
+                return Response(response=json.dumps(response),
+                                status=401,
+                                mimetype='application/json')
+
             return Response(response=json.dumps(response),
                             status=200,
                             mimetype='application/json')
 
+
+
+@app.route('/top', methods=['GET'])
+def top10():
+    if request.method == 'GET':
+        data = {
+                   "database": "urbanisation",
+                   "collection": "User"
+        }
+        obj1 = MongoAPI(data)
+        response = obj1.readWith()
+        return Response(response=json.dumps(response),
+                        status=200,
+                        mimetype='application/json')
 
 @app.route('/insertImg', methods=['POST'])
 def img_post():
