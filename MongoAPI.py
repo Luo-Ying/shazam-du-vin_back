@@ -23,6 +23,11 @@ class MongoAPI:
         output = [{item: data[item] for item in data if item != '_id'} for data in documents]
         return output
 
+    def readTop(self):
+        documents = self.collection.find().sort("noteGlobal", -1).limit(10)
+        output = [{item: data[item] for item in data if item != '_id'} for data in documents]
+        return output
+
     def write(self, data):
         # log.info('Writing Data')
         new_document = data['data']

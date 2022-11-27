@@ -217,10 +217,10 @@ def top10():
     if request.method == 'GET':
         data = {
             "database": "urbanisation",
-            "collection": "User"
+            "collection": "Vin"
         }
         obj1 = MongoAPI(data)
-        response = obj1.readWith()
+        response = obj1.readTop()
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
