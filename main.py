@@ -27,7 +27,7 @@ def hello_world():
         print(bucket.name)
     return "<p>Hello, World!</p><br/>"
 
-
+'''
 @app.route("/testIMG", methods=['GET', 'POST'])
 def test_img():
     # image = request.files.get('image', '')
@@ -37,15 +37,15 @@ def test_img():
     if file and allowed_file(file.filename):
         filename = uuid4()
         extension = file.filename.rsplit('.', 1)[1].lower()
-        filename = str(filename) + extension
+        filename = str(filename) + '.' + extension
         s3 = boto3.client('s3')
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         filepath = "upload/"+filename
         with open(filepath, "rb") as f:
             s3.upload_fileobj(f, "urbanisationceriperso", filename, ExtraArgs={'ContentType': "image/"+extension, 'ACL': 'public-read'})
-        url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com//{filename}'
+        url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
-
+'''
 
 @app.route("/getUser", methods=['POST'])
 def getUser():
@@ -104,24 +104,32 @@ def user_crud():
                         mimetype='application/json')
 
     if request.method == 'GET':
-        data = request.json
+        data = {
+            "database": "urbanisation",
+            "collection": "User",
+            "filter": {
+                "username": request.args.get('username'),
+                "password": request.args.get('password')
+            }
+        }
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
-            response = obj1.read()
-
-            exist = json.dumps(response)
-            if (exist["username"] == ""):
-                return Response(response=json.dumps(response),
-                                status=401,
-                                mimetype='application/json')
-
+            response = obj1.readWith()
             return Response(response=json.dumps(response),
-                            status=200,
+                            status=401,
                             mimetype='application/json')
 
         if data and 'filter' in data:
             obj1 = MongoAPI(data)
             response = obj1.readWith()
+
+            exist = json.dumps(response)
+            print(exist)
+            if exist.find("username") == "":
+                return Response(response=json.dumps(response),
+                                status=401,
+                                mimetype='application/json')
+
             return Response(response=json.dumps(response),
                             status=200,
                             mimetype='application/json')
@@ -186,6 +194,19 @@ def vin_crud():
 
 @app.route('/insertImg', methods=['POST'])
 def img_post():
-    return"Hello world"
-    #if request.method == 'POST':
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = uuid4()
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = str(filename) + '.' + extension
+        s3 = boto3.client('s3')
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        filepath = "upload/" + filename
+        with open(filepath, "rb") as f:
+            s3.upload_fileobj(f, "urbanisationceriperso", filename,
+                              ExtraArgs={'ContentType': "image/" + extension, 'ACL': 'public-read'})
+        url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
+        return url
 
