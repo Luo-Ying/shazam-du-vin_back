@@ -1,10 +1,12 @@
+import certifi
 from flask import Flask, request, json, Response
 from pymongo import MongoClient
 
 
 class MongoAPI:
     def __init__(self, data):
-        self.client = MongoClient("mongodb://127.0.0.1:27017/")
+        #self.client = MongoClient("mongodb://127.0.0.1:27017/")
+        self.client = MongoClient('mongodb+srv://ovhUser:h0Ip6pe9NJnK1EnC@urbanisationceri.vpzkh.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=certifi.where())
 
         database = data['database']
         collection = data['collection']
