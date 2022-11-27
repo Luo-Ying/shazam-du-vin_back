@@ -6,3 +6,5 @@ venv
 /venv/lib/
 /venv/pyvenv.cfg
 /.idea
+/upload/
+./upload/*

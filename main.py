@@ -1,10 +1,21 @@
-from flask import Flask, Response, json
+import os
+from uuid import uuid4
+
+from flask import Flask, Response, json, redirect
 from flask import request
 from MongoAPI import *
 import boto3
 
+UPLOAD_FOLDER = './upload/'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
 app = Flask(__name__)
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/")
 def hello_world():
@@ -20,15 +31,20 @@ def hello_world():
 @app.route("/testIMG", methods=['GET', 'POST'])
 def test_img():
     # image = request.files.get('image', '')
-    image = request.files["image"]
-    filename = image.filename
-    data = request.values.get('imageName')
-    print(image)
-    print(json.dumps(data))
-    s3 = boto3.client('s3')
-    with open(image, "rb") as f:
-        s3.upload_fileobj(f, "urbanisationceriperso", filename, ExtraArgs={'ACL': 'public-read'})
-    return "<p>Nice</p>"
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = uuid4()
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = str(filename) + extension
+        s3 = boto3.client('s3')
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        filepath = "upload/"+filename
+        with open(filepath, "rb") as f:
+            s3.upload_fileobj(f, "urbanisationceriperso", filename, ExtraArgs={'ContentType': "image/"+extension, 'ACL': 'public-read'})
+        url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com//{filename}'
+        return url
 
 
 @app.route("/getUser", methods=['POST'])
@@ -166,3 +182,10 @@ def vin_crud():
             return Response(response=json.dumps(response),
                             status=200,
                             mimetype='application/json')
+
+
+@app.route('/insertImg', methods=['POST'])
+def img_post():
+    return"Hello world"
+    #if request.method == 'POST':
+
