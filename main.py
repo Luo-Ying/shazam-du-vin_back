@@ -13,9 +13,11 @@ app = Flask(__name__)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route("/")
 def hello_world():
@@ -26,6 +28,7 @@ def hello_world():
     for bucket in s3.buckets.all():
         print(bucket.name)
     return "<p>Hello, World!</p><br/>"
+
 
 '''
 @app.route("/testIMG", methods=['GET', 'POST'])
@@ -46,23 +49,6 @@ def test_img():
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
 '''
-
-@app.route("/getUser", methods=['POST'])
-def getUser():
-    data = request.json
-    if data is None or data == {} or 'Filter' not in data:
-        obj1 = MongoAPI(data)
-        response = obj1.read()
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
-
-    if data and 'Filter' in data:
-        obj1 = MongoAPI(data)
-        response = obj1.readWith()
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
 
 
 @app.route('/User', methods=['GET', 'POST', 'DELETE', 'PUT'])
@@ -118,7 +104,7 @@ def user_crud():
                 "database": "urbanisation",
                 "collection": "User"
             }
-            
+
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
@@ -181,14 +167,28 @@ def vin_crud():
                         mimetype='application/json')
 
     if request.method == 'GET':
-        data = {
-            "database": "urbanisation",
-            "collection": "Vin",
-            "filter": {
-                "username": request.args.get('username'),
-                "password": request.args.get('password')
+        if request.args.get('nom'):
+            data = {
+                "database": "urbanisation",
+                "collection": "Vin",
+                "filter": {
+                    "username": request.args.get('nom')
+                }
             }
-        }
+        elif request.args.get('id'):
+            data = {
+                "database": "urbanisation",
+                "collection": "Vin",
+                "filter": {
+                    "username": request.args.get('id')
+                }
+            }
+        else:
+            data = {
+                "database": "urbanisation",
+                "collection": "Vin"
+            }
+
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
@@ -202,9 +202,9 @@ def vin_crud():
 
             exist = json.dumps(response)
             print(exist)
-            if exist.find("username") == "":
-                return Response(response=json.dumps(response),
-                                status=401,
+            if exist.find("nom") == "":
+                return Response(response="Error 404 Not foud",
+                                status=404,
                                 mimetype='application/json')
 
             return Response(response=json.dumps(response),
@@ -212,19 +212,19 @@ def vin_crud():
                             mimetype='application/json')
 
 
-
 @app.route('/top', methods=['GET'])
 def top10():
     if request.method == 'GET':
         data = {
-                   "database": "urbanisation",
-                   "collection": "User"
+            "database": "urbanisation",
+            "collection": "User"
         }
         obj1 = MongoAPI(data)
         response = obj1.readWith()
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
+
 
 @app.route('/insertImg', methods=['POST'])
 def img_post():
@@ -243,4 +243,3 @@ def img_post():
                               ExtraArgs={'ContentType': "image/" + extension, 'ACL': 'public-read'})
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
-
