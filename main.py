@@ -114,9 +114,10 @@ def user_crud():
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
-            return Response(response=json.dumps(response),
-                            status=200,
-                            mimetype='application/json')
+            if (response == {}):
+                return Response(response=json.dumps(response),
+                                status=200,
+                                mimetype='application/json')
 
         if data and 'filter' in data:
             obj1 = MongoAPI(data)
@@ -124,7 +125,7 @@ def user_crud():
 
             exist = json.dumps(response)
             print(exist)
-            if exist.find("username") == "":
+            if exist == []:
                 return Response(response=json.dumps(response),
                                 status=401,
                                 mimetype='application/json')
