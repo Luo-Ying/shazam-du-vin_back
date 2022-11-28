@@ -124,8 +124,8 @@ def user_crud():
             response = obj1.readWith()
 
             exist = json.dumps(response)
-            print(exist)
-            if not exist:
+            print(len(exist))
+            if len(exist) == 0:
                 return Response(response=json.dumps(response),
                                 status=401,
                                 mimetype='application/json')
