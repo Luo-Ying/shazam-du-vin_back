@@ -125,7 +125,7 @@ def user_crud():
 
             exist = json.dumps(response)
             print(len(exist))
-            if len(exist) == 0:
+            if len(exist) <= 2:
                 return Response(response=json.dumps(response),
                                 status=401,
                                 mimetype='application/json')
