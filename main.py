@@ -114,8 +114,6 @@ def user_crud():
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
-            for item in response:
-                print(item['_id'])
             return Response(response=json.dumps(response),
                             status=200,
                             mimetype='application/json')
