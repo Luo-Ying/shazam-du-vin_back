@@ -61,7 +61,7 @@ class MongoAPI:
                 "$search": {
                     "index": "nom_text",
                     "text": {
-                        "query": filt['nom'],
+                        "query": "chateau",
                         "path": 'nom',
                         "fuzzy": {}
                     }
