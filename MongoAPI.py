@@ -1,7 +1,10 @@
+from pprint import PrettyPrinter
+
 import certifi
 from flask import Flask, request, json, Response
 from pymongo import MongoClient
 
+printer = PrettyPrinter()
 
 class MongoAPI:
     def __init__(self, data):
@@ -65,4 +68,5 @@ class MongoAPI:
                 }
             }
         ])
+        printer.pprint(list(result))
         return result
