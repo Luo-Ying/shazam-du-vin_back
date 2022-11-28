@@ -50,3 +50,9 @@ class MongoAPI:
         response = self.collection.delete_one(filt)
         output = {'Status': 'Successfully Deleted' if response.deleted_count > 0 else "Document not found."}
         return output
+
+    def orm(self):
+        filt = self.data['filter']
+        documents = self.collection.find({"$text": {"$search": {"text": {"path": "title","query": "surfer","fuzzy": {}}}}})
+        output = [{item: data[item] for item in data if item != '_id'} for data in documents]
+        return output

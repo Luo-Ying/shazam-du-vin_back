@@ -251,5 +251,28 @@ def img_post():
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
 
+
+@app.route('/orm')
+def orm_endpoint():
+    if request.method == 'GET':
+        if request.args.get('searchStr'):
+            data = {
+                "database": "urbanisation",
+                "collection": "Vin",
+                "filter": {
+                    "nom": request.args.get('searchStr')
+                }
+            }
+            obj1 = MongoAPI(data)
+            response = obj1.orm()
+            return Response(response=json.dumps(response),
+                            status=200,
+                            mimetype='application/json')
+
+    return Response(response=json.dumps({"Error": "Please provide connection information"}),
+                    status=400,
+                    mimetype='application/json')
+
+
 if __name__ == "__main__":
-   app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
