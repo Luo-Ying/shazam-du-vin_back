@@ -59,8 +59,14 @@ def user_crud():
             return Response(response=json.dumps({"Error": "Please provide connection information"}),
                             status=400,
                             mimetype='application/json')
-        obj1 = MongoAPI(data)
+        dataFinal = {
+            "database": "urbanisation",
+            "collection": "User",
+            "data": data["data"]
+        }
+        obj1 = MongoAPI(dataFinal)
         response = obj1.write(data)
+        print(dataFinal)
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
