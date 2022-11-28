@@ -53,6 +53,6 @@ class MongoAPI:
 
     def orm(self):
         filt = self.data['filter']
-        documents = self.collection.find({"$text": {"$search": {"text": {"path": "title","query": "surfer","fuzzy": {}}}}})
+        documents = self.collection.find({"$text": {"$search": {"query": filt['nom'], "fuzzy": {}}}})
         output = [{item: data[item] for item in data if item != '_id'} for data in documents]
         return output
