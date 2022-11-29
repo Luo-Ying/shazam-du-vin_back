@@ -54,7 +54,7 @@ class MongoAPI:
         output = {'Status': 'Successfully Deleted' if response.deleted_count > 0 else "Document not found."}
         return output
 
-    def orm(self):
+    '''def orm(self):
         filt = self.data['filter']
         result = self.collection.aggregate([
             {
@@ -69,4 +69,4 @@ class MongoAPI:
             }
         ])
         printer.pprint(list(result))
-        return result
+        return result'''

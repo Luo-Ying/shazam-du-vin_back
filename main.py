@@ -111,13 +111,14 @@ def user_crud():
                 "collection": "User"
             }
 
+        print(data)
+
         if data is None or data == {} or 'filter' not in data:
             obj1 = MongoAPI(data)
             response = obj1.read()
-            if (response == {}):
-                return Response(response=json.dumps(response),
-                                status=200,
-                                mimetype='application/json')
+            return Response(response=json.dumps(response),
+                            status=200,
+                            mimetype='application/json')
 
         if data and 'filter' in data:
             obj1 = MongoAPI(data)
@@ -251,7 +252,7 @@ def img_post():
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
 
-
+'''
 @app.route('/orm')
 def orm_endpoint():
     if request.method == 'GET':
@@ -272,7 +273,8 @@ def orm_endpoint():
     return Response(response=json.dumps({"Error": "Please provide connection information"}),
                     status=400,
                     mimetype='application/json')
-
+'''
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(host='0.0.0.0', port=5000)
+    #app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
