@@ -249,7 +249,10 @@ def img_post():
         filename = uuid4()
         extension = file.filename.rsplit('.', 1)[1].lower()
         filename = str(filename) + '.' + extension
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3',
+            aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
+            aws_secret_access_key="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"
+                          )
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         filepath = "upload/" + filename
         with open(filepath, "rb") as f:
