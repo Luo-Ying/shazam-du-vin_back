@@ -97,14 +97,20 @@ def user_crud():
 
     if request.method == 'GET':
         if request.args.get('username'):
-            data = {
-                "database": "urbanisation",
-                "collection": "User",
-                "filter": {
-                    "username": request.args.get('username'),
-                    "password": request.args.get('password')
+            if request.args.get('password'):
+                data = {
+                    "database": "urbanisation",
+                    "collection": "User",
+                    "filter": {
+                        "username": request.args.get('username'),
+                        "password": request.args.get('password')
+                    }
                 }
-            }
+            else:
+                data = {
+                    "database": "urbanisation",
+                    "collection": "User"
+                }
         else:
             data = {
                 "database": "urbanisation",
