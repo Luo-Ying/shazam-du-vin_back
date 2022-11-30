@@ -20,9 +20,17 @@ def allowed_file(filename):
 
 
 @app.route("/")
+def healthcheck():
+    return "OK!"
+
+
+@app.route("/testBucket")
 def hello_world():
     s3 = boto3.resource("s3")
-    test = boto3.client('s3')
+    test = boto3.client('s3',
+                        aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
+                        aws_secret_access_key="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"
+                        )
 
     # Print out bucket names
     for bucket in s3.buckets.all():
@@ -250,8 +258,8 @@ def img_post():
         extension = file.filename.rsplit('.', 1)[1].lower()
         filename = str(filename) + '.' + extension
         s3 = boto3.client('s3',
-            aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
-            aws_secret_access_key="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"
+                          aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
+                          aws_secret_access_key="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"
                           )
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         filepath = "upload/" + filename
@@ -260,6 +268,7 @@ def img_post():
                               ExtraArgs={'ContentType': "image/" + extension, 'ACL': 'public-read'})
         url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
         return url
+
 
 '''
 @app.route('/orm')
@@ -286,4 +295,4 @@ def orm_endpoint():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-    #app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    # app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
