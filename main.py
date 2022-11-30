@@ -145,7 +145,7 @@ def user_crud():
                                 status=401,
                                 mimetype='application/json')
 
-            return Response(response=json.dumps(response),
+            return Response(response="OK",
                             status=200,
                             mimetype='application/json')
 
