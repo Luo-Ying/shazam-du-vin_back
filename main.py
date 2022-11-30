@@ -145,7 +145,12 @@ def user_crud():
                                 status=401,
                                 mimetype='application/json')
 
-            return Response(response="OK",
+            delim = exist.split(',', 1)[1]
+            delim = delim.split(']', 1)[0]
+            delim = delim.split(' ', 1)[1]
+            delim = '{' + delim + '}}'
+            print(delim)
+            return Response(response=json.dumps(exist),
                             status=200,
                             mimetype='application/json')
 
