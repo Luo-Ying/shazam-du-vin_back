@@ -1,4 +1,5 @@
 import os
+import io
 from uuid import uuid4
 
 from flask import Flask, Response, json, redirect
@@ -275,28 +276,51 @@ def img_post():
         return url
 
 
-'''
-@app.route('/orm')
-def orm_endpoint():
-    if request.method == 'GET':
-        if request.args.get('searchStr'):
-            data = {
-                "database": "urbanisation",
-                "collection": "Vin",
-                "filter": {
-                    "nom": request.args.get('searchStr')
-                }
-            }
-            obj1 = MongoAPI(data)
-            response = obj1.orm()
-            return Response(response=json.dumps(response),
-                            status=200,
-                            mimetype='application/json')
 
-    return Response(response=json.dumps({"Error": "Please provide connection information"}),
-                    status=400,
-                    mimetype='application/json')
-'''
+@app.route('/ocr', methods=['POST'])
+def orm_endpoint():
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = uuid4()
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = str(filename) + '.' + extension
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        filepath = "upload/" + filename
+
+        # Read document content
+        with open(filepath, 'rb') as document:
+            imageBytes = bytearray(document.read())
+
+        # Amazon Textract client
+        textract = boto3.client('textract',
+                              aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
+                              aws_secret_access_key="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")
+
+        # Call Amazon Textract
+        response = textract.detect_document_text(Document={'Bytes': imageBytes})
+
+        # print(response)
+
+        formatedResponse = []
+
+        # Print detected text
+        for item in response["Blocks"]:
+            if item["BlockType"] == "LINE":
+                print('\033[94m' + item["Text"] + '\033[0m')
+                formatedResponse.append(item["Text"])
+
+        del formatedResponse[-1]
+        formatedResponse = [item for item in formatedResponse if len(item) > 2]
+
+        for item in formatedResponse:
+            print(item)
+
+
+        return "OK"
+    return "NOT OK"
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
