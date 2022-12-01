@@ -6,6 +6,7 @@ from flask import Flask, Response, json, redirect
 from flask import request
 from MongoAPI import *
 import boto3
+import re
 
 UPLOAD_FOLDER = './upload/'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -67,6 +68,20 @@ def user_crud():
         if data is None or data == {} or 'data' not in data:
             return Response(response=json.dumps({"Error": "Please provide connection information"}),
                             status=400,
+                            mimetype='application/json')
+
+        dataTest = {
+            "database": "urbanisation",
+            "collection": "User",
+            "filter": {
+                "username": data["username"]
+            }
+        }
+        obj2 = MongoAPI(dataTest)
+        res = obj2.readWith()
+        if len(res) > 2:
+            return Response(response="User already exist with this username",
+                            status=200,
                             mimetype='application/json')
         dataFinal = {
             "database": "urbanisation",
@@ -200,7 +215,7 @@ def vin_crud():
                 "database": "urbanisation",
                 "collection": "Vin",
                 "filter": {
-                    "username": request.args.get('nom')
+                    "id": request.args.get('nom')
                 }
             }
         elif request.args.get('id'):
@@ -208,7 +223,7 @@ def vin_crud():
                 "database": "urbanisation",
                 "collection": "Vin",
                 "filter": {
-                    "username": request.args.get('id')
+                    "id": request.args.get('id')
                 }
             }
         else:
@@ -276,7 +291,6 @@ def img_post():
         return url
 
 
-
 @app.route('/ocr', methods=['POST'])
 def orm_endpoint():
     file = request.files['file']
@@ -295,8 +309,8 @@ def orm_endpoint():
 
         # Amazon Textract client
         textract = boto3.client('textract',
-                              aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
-                              aws_secret_access_key="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")
+                                aws_access_key_id="AKIA6JLBSVCU7FDCKX4U",
+                                aws_secret_access_key="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")
 
         # Call Amazon Textract
         response = textract.detect_document_text(Document={'Bytes': imageBytes})
@@ -304,6 +318,7 @@ def orm_endpoint():
         # print(response)
 
         formatedResponse = []
+        listVin = []
 
         # Print detected text
         for item in response["Blocks"]:
@@ -311,15 +326,78 @@ def orm_endpoint():
                 print('\033[94m' + item["Text"] + '\033[0m')
                 formatedResponse.append(item["Text"])
 
-        del formatedResponse[-1]
+        for item in formatedResponse:
+            if item.find('vivino') != -1 or item.find('VIVINO') != -1 or item.find('Vivino') != -1:
+                del formatedResponse[-1]
+
         formatedResponse = [item for item in formatedResponse if len(item) > 2]
 
         for item in formatedResponse:
             print(item)
+            data = {
+                "database": "urbanisation",
+                "collection": "Vin"
+            }
+            query = {
+                "nom": {
+                    "$regex": '^.*' + item + '.*',
+                    "$options": 'i'  # case-insensitive
+                }
+            }
+            obj1 = MongoAPI(data)
+            documents = obj1.collection.find(query)
+            response = [{item: data[item] for item in data if item != '_id'} for data in documents]
+            listVin.append(response)
 
+        print(listVin)
+        setOfElement = []
+        listOfId = list()
+        for response in listVin:
+            for data in response:
+                if data["id"] not in listOfId:
+                    listOfId.append(data["id"])
+                    setOfElement.append(data)
 
-        return "OK"
+        print(listOfId)
+        print(setOfElement)
+
+        return Response(response=json.dumps(setOfElement),
+                    status=200,
+                    mimetype='application/json')
+
     return "NOT OK"
+
+
+@app.route('/searchL', methods=['GET'])
+def search_levenshtein():
+    data = {
+        "database": "urbanisation",
+        "collection": "Vin"
+    }
+
+    query = {
+        "nom": {
+            "$regex": '^.*Rhône.*',
+            "$options": 'i'  # case-insensitive
+        }
+    }
+
+    obj1 = MongoAPI(data)
+    documents = obj1.collection.find(query)
+    response = [{item: data[item] for item in data if item != '_id'} for data in documents]
+    setOfElement = []
+    listOfId = list()
+    for data in response:
+        if data["id"] not in listOfId:
+            listOfId.append(data["id"])
+            setOfElement.append(data)
+
+    print(setOfElement)
+    print(listOfId)
+
+    return Response(response=json.dumps(setOfElement),
+                    status=200,
+                    mimetype='application/json')
 
 
 if __name__ == "__main__":
