@@ -75,14 +75,16 @@ def user_crud():
             "database": "urbanisation",
             "collection": "User",
             "filter": {
-                "username": data["username"]
+                "username": data['data']["username"]
             }
         }
         obj2 = MongoAPI(dataTest)
         res = obj2.readWith()
-        if len(res) > 2:
-            return Response(response="User already exist with this username",
-                            status=200,
+        print(res)
+        print(len(res))
+        if len(res) > 0:
+            return Response(response=json.dumps({"Error": "User already exist with this username"}),
+                            status=401,
                             mimetype='application/json')
         dataFinal = {
             "database": "urbanisation",
@@ -407,9 +409,57 @@ def search_levenshtein():
                     status=200,
                     mimetype='application/json')
 
-#TODO: - enpoint '/favVin'
-#TODO: - replace accent from ocr with it's counterpart
 
+@app.route('/favVin', methods=['GET'])
+def fav_vin():
+    if request.method == 'GET':
+        if request.args.get('username'):
+            data = {
+                "database": "urbanisation",
+                "collection": "User",
+                "filter": {
+                    "username": request.args.get('username')
+                }
+            }
+
+            print(data)
+
+            obj1 = MongoAPI(data)
+            res = obj1.readWith()
+
+            print(res[0]['vinFav']['value'])
+
+            vins = res[0]['vinFav']['value']
+
+            if len(vins) == 0:
+                return Response(response=json.dumps({}),
+                                status=200,
+                                mimetype='application/json')
+
+            listVins = []
+
+            for item in vins:
+                data2 = {
+                    "database": "urbanisation",
+                    "collection": "Vin",
+                    "filter": {
+                        "id": item
+                    }
+                }
+                obj2 = MongoAPI(data2)
+                temp = obj2.readWith()
+                if len(temp) > 0:
+                    listVins.append(temp)
+
+            return Response(response=json.dumps(listVins),
+                            status=200,
+                            mimetype='application/json')
+
+    return Response(response=json.dumps({"Error": "Bad Request"}),
+                    status=400,
+                    mimetype='application/json')
+
+#TODO: - enpoint '/favVin'
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
