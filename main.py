@@ -41,27 +41,6 @@ def hello_world():
     return "<p>Hello, World!</p><br/>"
 
 
-'''
-@app.route("/testIMG", methods=['GET', 'POST'])
-def test_img():
-    # image = request.files.get('image', '')
-    file = request.files['file']
-    if file.filename == '':
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = uuid4()
-        extension = file.filename.rsplit('.', 1)[1].lower()
-        filename = str(filename) + '.' + extension
-        s3 = boto3.client('s3')
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        filepath = "upload/"+filename
-        with open(filepath, "rb") as f:
-            s3.upload_fileobj(f, "urbanisationceriperso", filename, ExtraArgs={'ContentType': "image/"+extension, 'ACL': 'public-read'})
-        url = f'https://urbanisationceriperso.s3.eu-west-3.amazonaws.com/{filename}'
-        return url
-'''
-
-
 @app.route('/User', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def user_crud():
     if request.method == 'POST':
