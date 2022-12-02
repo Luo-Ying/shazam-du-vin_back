@@ -7,6 +7,7 @@ from flask import request
 from MongoAPI import *
 import boto3
 import re
+from unidecode import unidecode
 
 UPLOAD_FOLDER = './upload/'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -332,7 +333,14 @@ def orm_endpoint():
 
         formatedResponse = [item for item in formatedResponse if len(item) > 2]
 
+        decodeResponse = []
+
         for item in formatedResponse:
+            decodeResponse.append(unidecode(item))
+
+        print(decodeResponse)
+
+        for item in decodeResponse:
             print(item)
             data = {
                 "database": "urbanisation",
@@ -398,6 +406,9 @@ def search_levenshtein():
     return Response(response=json.dumps(setOfElement),
                     status=200,
                     mimetype='application/json')
+
+#TODO: - enpoint '/favVin'
+#TODO: - replace accent from ocr with it's counterpart
 
 
 if __name__ == "__main__":
