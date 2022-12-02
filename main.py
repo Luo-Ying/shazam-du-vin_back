@@ -175,7 +175,8 @@ def vin_crud():
             noteGlobale += commentaire["note"]
             div += 1
         if div > 0:
-            noteGlobale = noteGlobale // div
+            noteGlobale = noteGlobale / div
+            noteGlobale = round(noteGlobale, 2)
             body["noteGlobale"] = noteGlobale
         print(body)
         data = {
