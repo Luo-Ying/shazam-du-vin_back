@@ -168,8 +168,25 @@ def vin_crud():
                         mimetype='application/json')
 
     if request.method == 'PUT':
-        data = request.json
-        if data is None or data == {} or 'data' not in data:
+        body = request.json
+        noteGlobale = 0
+        div = 0
+        for commentaire in body["commentaire"]:
+            noteGlobale += commentaire["note"]
+            div += 1
+        if div > 0:
+            noteGlobale = noteGlobale // div
+            body["noteGlobale"] = noteGlobale
+        print(body)
+        data = {
+            "database": "urbanisation",
+            "collection": "Vin",
+            "filter": {
+                "id": body["id"]
+            },
+            "data": body
+        }
+        if data is None or data == {} or 'data' not in data or 'filter' not in data:
             return Response(response=json.dumps({"Error": "Please provide connection information"}),
                             status=400,
                             mimetype='application/json')
@@ -351,8 +368,8 @@ def orm_endpoint():
         print(setOfElement)
 
         return Response(response=json.dumps(setOfElement),
-                    status=200,
-                    mimetype='application/json')
+                        status=200,
+                        mimetype='application/json')
 
     return "NOT OK"
 
@@ -438,7 +455,8 @@ def fav_vin():
                     status=400,
                     mimetype='application/json')
 
-#TODO: - enpoint '/favVin'
+
+# TODO: - enpoint '/favVin'
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
