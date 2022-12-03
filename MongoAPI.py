@@ -1,6 +1,7 @@
 from pprint import PrettyPrinter
 
 import certifi
+import pymongo
 from flask import Flask, request, json, Response
 from pymongo import MongoClient
 
@@ -29,7 +30,7 @@ class MongoAPI:
         return output
 
     def readTop(self):
-        documents = self.collection.find().sort("noteGlobal", -1).limit(10)
+        documents = self.collection.find().sort("noteGlobale", pymongo.DESCENDING).limit(10)
         output = [{item: data[item] for item in data if item != '_id'} for data in documents]
         return output
 
@@ -50,7 +51,7 @@ class MongoAPI:
     def delete(self, data):
         filt = data['filter']
         response = self.collection.delete_one(filt)
-        output = {'Status': 'Successfully Updated' if response.modified_count > 0 else "Nothing was updated."}
+        output = {'Status': 'Successfully Updated' if response.deleted_count > 0 else "Nothing was updated."}
         return output
 
     def ocr(self):
