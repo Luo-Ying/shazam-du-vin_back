@@ -446,7 +446,10 @@ def fav_vin():
                 obj2 = MongoAPI(data2)
                 temp = obj2.readWith()
                 if len(temp) > 0:
-                    listVins.append(temp)
+                    listVins.append(temp[0])
+
+            print('---------------------------')
+            print(listVins)
 
             return Response(response=json.dumps(listVins),
                             status=200,
