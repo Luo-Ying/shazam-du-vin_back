@@ -1,7 +1,6 @@
 import os
 import io
 from uuid import uuid4
-
 from flask import Flask, Response, json, redirect
 from flask import request
 from MongoAPI import *
@@ -9,6 +8,7 @@ import boto3
 import re
 from unidecode import unidecode
 
+# Define global vars
 UPLOAD_FOLDER = './upload/'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
@@ -17,16 +17,19 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
+# Define files allowed in cloudfront and rekognition
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# Base url, defined to allow Lightsail to run healthcheck and init services
 @app.route("/")
 def healthcheck():
     return "OK!"
 
 
+# Test endpoint to check how and if boto3 is working
 @app.route("/testBucket")
 def hello_world():
     s3 = boto3.resource("s3")
@@ -41,6 +44,7 @@ def hello_world():
     return "<p>Hello, World!</p><br/>"
 
 
+# CRUD for user
 @app.route('/User', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def user_crud():
     if request.method == 'POST':
@@ -153,6 +157,7 @@ def user_crud():
                             mimetype='application/json')
 
 
+# CRUD for wine
 @app.route('/Vin', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def vin_crud():
     if request.method == 'POST':
@@ -255,6 +260,7 @@ def vin_crud():
                             mimetype='application/json')
 
 
+# Custom endpoiont that return the 10 best rated wines.
 @app.route('/top', methods=['GET'])
 def top10():
     if request.method == 'GET':
@@ -269,6 +275,7 @@ def top10():
                         mimetype='application/json')
 
 
+# Endpoint to push img on cloudfront, it will return the created URL
 @app.route('/insertImg', methods=['POST'])
 def img_post():
     file = request.files['file']
@@ -291,6 +298,7 @@ def img_post():
         return url
 
 
+# Endpoint to send dataa to AWS Rekognition
 @app.route('/ocr', methods=['POST'])
 def orm_endpoint():
     file = request.files['file']
@@ -325,6 +333,8 @@ def orm_endpoint():
             if item["BlockType"] == "LINE":
                 print('\033[94m' + item["Text"] + '\033[0m')
                 formatedResponse.append(item["Text"])
+
+        print(formatedResponse)
 
         for item in formatedResponse:
             if item.find('vivino') != -1 or item.find('VIVINO') != -1 or item.find('Vivino') != -1:
@@ -375,6 +385,8 @@ def orm_endpoint():
     return "NOT OK"
 
 
+# Some function to try to implement Levenstein search. Not usefull in the end as Mongo Atlas provide a fuzzy seach operation
+# That work just like a custom made levenstein would
 @app.route('/searchL', methods=['GET'])
 def search_levenshtein():
     data = {
@@ -407,6 +419,7 @@ def search_levenshtein():
                     mimetype='application/json')
 
 
+# Endpoint that return a user's favorite wine as a list
 @app.route('/favVin', methods=['GET'])
 def fav_vin():
     if request.method == 'GET':
@@ -424,9 +437,7 @@ def fav_vin():
             obj1 = MongoAPI(data)
             res = obj1.readWith()
 
-            print(res[0]['vinFav']['value'])
-
-            vins = res[0]['vinFav']['value']
+            vins = res[0]['vinFav']
 
             if len(vins) == 0:
                 return Response(response=json.dumps({}),
@@ -459,9 +470,7 @@ def fav_vin():
                     status=400,
                     mimetype='application/json')
 
-
-# TODO: - enpoint '/favVin'
-
+#Start the server with this
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
     # app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

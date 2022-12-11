@@ -6,7 +6,8 @@ from pymongo import MongoClient
 
 client = MongoClient('mongodb://127.0.0.1:27017')
 
-
+#This file was the first iteration used to try to create a mongodb connection
+#It was later made useless as we switched to another implementation
 
 def get_db():
     """

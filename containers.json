@@ -1,6 +1,6 @@
 {
     "flask": {
-        "image": ":urba-backend.flask-container.3",
+        "image": ":flask-service.flask-container.5",
         "ports": {
             "5000": "HTTP"
         }

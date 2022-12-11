@@ -7,6 +7,8 @@ from pymongo import MongoClient
 
 printer = PrettyPrinter()
 
+#This is the a wrapper made to make developpement of the API easier. It containes the basic CRUD method with
+#a mix of some custom to work with every endpoint depending of the need
 class MongoAPI:
     def __init__(self, data):
         #self.client = MongoClient("mongodb://127.0.0.1:27017/")
